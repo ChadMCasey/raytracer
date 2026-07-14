@@ -15,9 +15,9 @@ class Controller {
         this.twoDContext.fillRect(x, y, 1, 1);
     }
     // coodinate system conversion to 2D cartesian plane
-    canvasCoordConversion(Cw, Ch, Cx, Cy) {
-        const Sx = Cw / 2 + Cx;
-        const Sy = Ch / 2 - Cy;
+    canvasCoordConversion(Cx, Cy) {
+        const Sx = this.canvasW / 2 + Cx;
+        const Sy = this.canvasH / 2 - Cy;
         return [Sx, Sy];
     }
     canvasToViewportCoord(Cx, Cy) {
@@ -88,7 +88,7 @@ class Controller {
         }
         // no intersection > paint as the background color
         if (!closestSphere) {
-            return [0, 0, 0]; // background color, we should set this as a constant.
+            return [255, 255, 255]; // background color, we should set this as a constant.
         }
         return closestSphere.color;
     }
@@ -102,40 +102,38 @@ class Controller {
         const canvasMaxY = this.canvasH / 2;
         const O = [0, 0, 0];
         // iterate the entire 2D cartesian plane of our canvas
-        console.log("Render pass started...");
         for (let x = canvasMinX; x <= canvasMaxX; x++) {
             for (let y = canvasMinY; y <= canvasMaxY; y++) {
                 // scale our canvas coordinates based on viewport dimensions
                 const D = this.canvasToViewportCoord(x, y);
                 // some compuatation
                 const color = this.traceRay(O, D, 1, Number.POSITIVE_INFINITY);
-                console.log();
-                this.putPixel(x, y, color);
+                const [putX, putY] = this.canvasCoordConversion(x, y);
+                this.putPixel(putX, putY, color);
             }
         }
-        console.log("Render pass ended...");
     }
 }
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 const spheres = [
-    // {
-    //   center: [0, -1, 3],
-    //   radius: 1,
-    //   color: [255, 0, 0] // RED
-    // },
+    {
+        center: [0, -1, 3],
+        radius: 1,
+        color: [255, 0, 0] // RED
+    },
     {
         center: [2, 0, 4],
         radius: 1,
         color: [0, 0, 255] // BLUE
     },
-    // {
-    //   center: [-2, 0, 4],
-    //   radius: 1,
-    //   color: [255, 0, 0] // GREEN
-    // }
+    {
+        center: [-2, 0, 4],
+        radius: 1,
+        color: [0, 255, 0] // GREEN
+    }
 ];
 //  instantiate controller
 const control = new Controller(canvas, context, spheres);
-canvas.addEventListener("click", () => control.render());
+document.addEventListener("click", () => control.render());
 export {};
