@@ -14,6 +14,7 @@ export type HitRecord = {
 
 // every object in the scene can be intersected by a ray
 export interface SceneObject {
+  readonly color: RGB,
   intersect(origin: Vec3, direction: Vec3): HitRecord | null;
 }
 

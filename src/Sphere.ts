@@ -3,15 +3,15 @@ import MathUtils from "./MathUtils";
 
 const mathUtils = new MathUtils();
 
-export class Sphere implements SceneObject {
+export default class Sphere implements SceneObject {
   private center: Vec3;
   private radius: number;
-  private RGB: RGB;
+  public readonly color: RGB;
 
-  constructor(center: Vec3, radius: number, RGB: RGB) {
+  constructor(center: Vec3, radius: number, color: RGB) {
     this.center = center;
     this.radius = radius;
-    this.RGB = RGB;
+    this.color = color;
   }
 
   intersect(O: Vec3, D: Vec3): HitRecord | null {

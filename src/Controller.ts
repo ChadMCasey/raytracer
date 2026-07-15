@@ -1,6 +1,7 @@
-import {Vec2, Vec3, Sphere} from "./types.js";
+import {Vec2, Vec3, SceneObject, HitRecord } from "./types.js";
 import MathUtils from "./MathUtils";
 import { CANVAS_DEFAULT_BACKGROUND, CAMERA_POS } from "./constants";
+import Sphere from "./Sphere";
 
 class Controller {
   private viewportWidth: number = 1;
@@ -10,19 +11,19 @@ class Controller {
   private canvasH: number;
   private canvas: HTMLElement;
   private twoDContext: CanvasRenderingContext2D;
-  private spheres: Sphere[];
+  private sceneObjs: SceneObject[];
 
   private mathUtils = new MathUtils();
   
   constructor(
     canvas: HTMLCanvasElement, 
     twoDcontext: CanvasRenderingContext2D, 
-    spheres: Sphere[]) {
+    sceneObjs: SceneObject[]) {
       this.canvas = canvas;
       this.canvasW = canvas?.width || -1; // -1 indicates error
       this.canvasH = canvas?.height || -1;
       this.twoDContext = twoDcontext
-      this.spheres = spheres;
+      this.sceneObjs = sceneObjs;
   }
 
   // x coordinate, y coordinate and color of the given pixel on the canvas
@@ -61,27 +62,6 @@ class Controller {
     return ray; 
   }
 
-  intersectRaySphere(O: Vec3, D: Vec3, sphere: Sphere): Vec2 {
-    const r: number = sphere.radius;
-    const CO: Vec3 = this.mathUtils.subtractVectors(O, sphere.center);
-
-    const a: number = this.mathUtils.dotVectors(D, D);
-    const b: number = 2 * this.mathUtils.dotVectors(CO, D);
-    const c: number = this.mathUtils.dotVectors(CO, CO) - r*r;
-
-    // at^2 +bt + c = 0 solution for t (ray intersection with sphere)
-    const discriminantSquared: number = b**2 - 4*a*c;
-
-    // discriminant < 0 then no intersection
-    if (discriminantSquared < 0) 
-      return [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
-    
-    const discriminant: number = Math.sqrt(b**2 - 4*a*c);
-
-    // single intersection case: ray tangent to sphere
-    return [(-b + discriminant) / (2*a), (-b - discriminant) / (2*a)];
-  }
-
   // distance from C to point P on sphere
   distFromCenter(C: Vec3, P: Vec3) {
     const CMinusP: Vec3 = this.mathUtils.subtractVectors(C, P);
@@ -94,37 +74,28 @@ class Controller {
   // inside of some requested range t.
   traceRay(O: Vec3, D: Vec3, minT: number, maxT: number) : Vec3
   {
-    // create vars for closest t and sphere
-    let closestT: number = Number.POSITIVE_INFINITY;
-    let closestSphere: Sphere | null = null;
+    let closestIntersection: number = Number.POSITIVE_INFINITY;
+    let closestObj: SceneObject | null = null;
 
-    // iterate shapes in 3D scene
-    for (let i = 0; i < this.spheres.length; i++) {
-      const sphere = this.spheres[i];
+    for (let i = 0; i < this.sceneObjs.length; i++) {
+      const sceneObj = this.sceneObjs[i];
 
-      // check if the ray running from the origin through the viewport
-      // intersects some object within the scene. In this context its a sphere
-      const [t1, t2]: Vec2 = this.intersectRaySphere(O, D, sphere);    
+      const intersection: HitRecord | null = sceneObj.intersect(O, D);    
       
-      // check if t1 is inbounds and see if its our closest intersection
-      if ((t1 >= minT && t1 <= maxT) && t1 < closestT) {
-        closestT = t1;
-        closestSphere = sphere;
+      if (!intersection) continue;
+
+      const distance = intersection.distance;
+      if ((distance >= minT && distance <= maxT) && distance < closestIntersection) {
+        closestIntersection = distance;
+        closestObj = sceneObj;
       }
-      
-      // check if t2 is inbounds and see if its our closest intersection
-      if ((t2 >= minT && t2 <= maxT) && t2 < closestT) {
-        closestT = t2;
-        closestSphere = sphere;
-      } 
     }
 
-    // no intersection > paint as the background color
-    if (!closestSphere) {
+    if (!closestObj) {
       return CANVAS_DEFAULT_BACKGROUND;
     }
 
-    return closestSphere.color;
+    return closestObj.color;
   }
 
   render() {
@@ -136,13 +107,10 @@ class Controller {
     
     const O: Vec3 = CAMERA_POS;
     
-    // iterate the entire 2D cartesian plane of our canvas
     for (let x: number = canvasMinX; x <= canvasMaxX; x++) {
       for (let y: number = canvasMinY; y <= canvasMaxY; y++) {
-        // scale our canvas coordinates based on viewport dimensions
         const D = this.canvasToViewportCoord(x, y);
 
-        // some compuatation
         const color = this.traceRay(O, D, 1, Number.POSITIVE_INFINITY);
 
         const [putX, putY] = this.canvasCoordConversion(x,y);
@@ -155,24 +123,13 @@ class Controller {
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-const spheres: Sphere[] = [
-  {
-    center: [0, -1, 3],
-    radius: 1,
-    color: [255, 0, 0] // RED
-  },
-  {
-    center: [2, 0, 4],
-    radius: 1,
-    color: [0, 0, 255] // BLUE
-  },
-  {
-    center: [-2, 0, 4],
-    radius: 1,
-    color: [0, 255, 0] // GREEN
-  }
+
+const sceneObjs: Array<SceneObject> = [
+  new Sphere([0, -1, 3], 1, [255, 0, 0]),
+  new Sphere([2, 0, 4], 1, [0, 0, 255]),
+  new Sphere([-2, 0, 4], 1, [0, 255, 0])
 ];
 
 //  instantiate controller
-const control = new Controller(canvas, context, spheres);
+const control = new Controller(canvas, context, sceneObjs);
 document.addEventListener("click", () => control.render());
