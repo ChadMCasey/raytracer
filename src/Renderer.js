@@ -1,15 +1,14 @@
 import { CAMERA_POS } from "./constants.js";
 import Scene from "./Scene.js";
 import Sphere from "./Sphere.js";
+import Camera from "./Camera.js";
 class Controller {
-    constructor(canvas, twoDcontext, scene) {
-        this.viewportWidth = 1;
-        this.viewportHeight = 1;
-        this.viewportDistance = 1;
+    constructor(canvas, twoDcontext, scene, camera) {
         this.canvasW = canvas?.width; // -1 indicates error
         this.canvasH = canvas?.height;
         this.twoDContext = twoDcontext;
         this.scene = scene;
+        this.camera = camera;
     }
     // x coordinate, y coordinate and color of the given pixel on the canvas
     putPixel(x, y, color) {
@@ -22,18 +21,12 @@ class Controller {
         const Sy = this.canvasH / 2 - Cy;
         return [Sx, Sy];
     }
-    canvasToViewportCoord(Cx, Cy) {
-        const Vx = (this.viewportWidth / this.canvasW) * Cx;
-        const Vy = (this.viewportHeight / this.canvasH) * Cy;
-        const Vz = this.viewportDistance; // fixed viewport distance, for now.
-        return [Vx, Vy, Vz];
-    }
     render() {
-        const O = CAMERA_POS;
+        const cameraPos = this.camera.position;
         for (let x = -this.canvasW / 2; x <= this.canvasW / 2; x++) {
             for (let y = -this.canvasH / 2; y <= this.canvasH / 2; y++) {
-                const D = this.canvasToViewportCoord(x, y);
-                const color = this.scene.traceRay(O, D, 1, Number.POSITIVE_INFINITY);
+                const D = this.camera.canvasToViewportCoord(this.canvasW, this.canvasH, x, y);
+                const color = this.scene.traceRay(cameraPos, D, 1, Number.POSITIVE_INFINITY);
                 const [putX, putY] = this.canvasCoordConversion(x, y);
                 this.putPixel(putX, putY, color);
             }
@@ -48,5 +41,6 @@ const sceneObjs = [
     new Sphere([-2, 0, 4], 1, [0, 255, 0])
 ];
 const scene = new Scene(sceneObjs);
-const control = new Controller(canvas, context, scene);
+const camera = new Camera(CAMERA_POS);
+const control = new Controller(canvas, context, scene, camera);
 document.addEventListener("click", () => control.render());
