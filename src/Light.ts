@@ -10,4 +10,5 @@ export default abstract class Light {
   }
 
   abstract computeIllumination(P: Vec3, N: Vec3, V: Vec3, s: number): number;
+  abstract getShadowProperties(P: Vec3): [Vec3, number] | null;
 }

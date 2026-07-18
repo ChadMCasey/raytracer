@@ -6,4 +6,7 @@ export default class AmbientLight extends Light {
     computeIllumination(P, N, V, s) {
         return this.intensity;
     }
+    getShadowProperties(P) {
+        return null;
+    }
 }

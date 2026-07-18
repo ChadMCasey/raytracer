@@ -37,4 +37,8 @@ export default class PointLight extends Light {
         const specularScalar = cosA ** s;
         return specularScalar;
     }
+    getShadowProperties(P) {
+        // max t of 1, we dont care about intersections beyond the light
+        return [mathUtils.subtractVectors(this.position, P), 1];
+    }
 }
