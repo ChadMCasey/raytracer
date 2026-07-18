@@ -10,22 +10,28 @@ export default class DirectionalLight extends Light {
         const DotNL = mathUtils.dotVectors(N, this.direction);
         if (DotNL < 0) // dont contribute negative light 
             return 0;
-        const diffuseScalar = DotNL / (mathUtils.magnitude(N) * mathUtils.magnitude(this.direction));
-        if (s === -1) // dont add specular highlights
-            return diffuseScalar * this.intensity;
+        const diffuseScalar = this.computeScalarDiffuse(N, this.direction, DotNL);
+        const specularScalar = this.computeScalarHighlight(N, V, s, this.direction, DotNL);
+        const totalScalar = (specularScalar === -1 ? 0 : specularScalar) + diffuseScalar;
+        const totalContributedIllumination = totalScalar * this.intensity;
+        return totalContributedIllumination;
+    }
+    computeScalarDiffuse(N, L, DotNL) {
+        return DotNL / (mathUtils.magnitude(L) * mathUtils.magnitude(N));
+    }
+    computeScalarHighlight(N, V, s, L, DotNL) {
+        if (s === -1)
+            return -1;
         const TwoN = mathUtils.scaleVector(N, 2);
         const ScaleTwoN = mathUtils.scaleVector(TwoN, DotNL);
-        const R = mathUtils.subtractVectors(ScaleTwoN, this.direction);
+        const R = mathUtils.subtractVectors(ScaleTwoN, L);
         const RDotV = mathUtils.dotVectors(R, V);
-        // ensure that our angle between View vector V 
-        // and reflection vector R does not exceed 90 deg
         if (RDotV < 0)
-            return diffuseScalar * this.intensity;
+            return -1;
         const magR = mathUtils.magnitude(R);
         const magV = mathUtils.magnitude(V);
         const cosA = RDotV / (magR * magV);
         const specularScalar = cosA ** s;
-        const totalScalar = specularScalar + diffuseScalar;
-        return totalScalar * this.intensity;
+        return specularScalar;
     }
 }
