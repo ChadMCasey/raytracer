@@ -1,4 +1,4 @@
-import { CANVAS_DEFAULT_BACKGROUND } from "./constants.js";
+import { CANVAS_DEFAULT_BACKGROUND, MIN_T_FOR_SHADOW } from "./constants.js";
 import Sphere from "./Sphere.js";
 import MathUtils from "./MathUtils.js";
 import AmbientLight from "./AmbientLight.js";
@@ -63,10 +63,10 @@ export default class Scene {
                 continue;
             }
             // do we have an intersection between us and the light?
-            const [lightPosition, maxT] = shadowProps;
-            const obstructionIntersection = this.closestIntersection(P, lightPosition, 0.001, maxT);
+            const [lightDirectionFromP, maxT] = shadowProps;
+            const obstruction = this.closestIntersection(P, lightDirectionFromP, MIN_T_FOR_SHADOW, maxT);
             // no intersection, means the light has made it to P unimpeded
-            if (!obstructionIntersection) {
+            if (!obstruction) {
                 intensity += light.computeIllumination(P, N, V, s);
             }
         }
