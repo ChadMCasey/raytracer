@@ -8,4 +8,13 @@ const CANVAS_DEFAULT_BACKGROUND: Vec3 = [255, 255, 255];
 // Camera
 const CAMERA_POS: Vec3 = [0, 0, 0];
 
-export { CANVAS_WIDTH, CANVAS_HEIGHT, CANVAS_DEFAULT_BACKGROUND, CAMERA_POS };
+// Minimal T for shadow determination
+const MIN_T_FOR_SHADOW = 0.001;
+
+export {
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
+  CANVAS_DEFAULT_BACKGROUND,
+  CAMERA_POS,
+  MIN_T_FOR_SHADOW,
+};

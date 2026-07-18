@@ -1,5 +1,5 @@
-import { Vec3, SceneObject, HitRecord } from "./types.js";
-import { CANVAS_DEFAULT_BACKGROUND } from "./constants.js";
+import { Vec3, SceneObject, HitRecord, SceneIntersection } from "./types.js";
+import { CANVAS_DEFAULT_BACKGROUND, MIN_T_FOR_SHADOW } from "./constants.js";
 import Sphere from "./Sphere.js";
 import MathUtils from "./MathUtils.js";
 import Light from "./Light.js";
@@ -26,10 +26,37 @@ export default class Scene {
   private sceneObjs: SceneObject[] = [...this.spheres];
 
   traceRay(O: Vec3, D: Vec3, minT: number, maxT: number): Vec3 {
-    let closestIntersection: number = Number.POSITIVE_INFINITY;
-    let closestObj: SceneObject | null = null;
-    let closestP: Vec3 | null = null;
-    let normalAtP: Vec3 | null = null;
+    // find the intersection between camera and closest scene object
+    const intersection: SceneIntersection | null = this.closestIntersection(
+      O,
+      D,
+      minT,
+      maxT,
+    );
+
+    // apply lighting to the closest intersection to the camera
+    if (intersection) {
+      const lightIntensity = this.computeLighting(
+        intersection.position,
+        intersection.normal,
+        mathUtils.scaleVector(D, -1),
+        intersection.object.specular,
+      );
+      return mathUtils.scaleVector(intersection.object.color, lightIntensity);
+    }
+
+    // we have no intersection
+    return CANVAS_DEFAULT_BACKGROUND;
+  }
+
+  closestIntersection(
+    O: Vec3,
+    D: Vec3,
+    minT: number,
+    maxT: number,
+  ): SceneIntersection | null {
+    let closestT: number = Number.POSITIVE_INFINITY;
+    let closestHit: SceneIntersection | null = null;
 
     for (let i = 0; i < this.sceneObjs.length; i++) {
       const sceneObj = this.sceneObjs[i];
@@ -41,34 +68,47 @@ export default class Scene {
       if (
         intersection.distance >= minT &&
         intersection.distance <= maxT &&
-        intersection.distance < closestIntersection
+        intersection.distance < closestT
       ) {
-        closestIntersection = intersection.distance;
-        closestP = intersection.position;
-        normalAtP = intersection.normal;
-        closestObj = sceneObj;
+        closestT = intersection.distance;
+        closestHit = {
+          distance: intersection.distance,
+          position: intersection.position,
+          normal: intersection.normal,
+          object: sceneObj,
+        };
       }
     }
 
-    // we have an intersection at P
-    if (closestObj && closestP && normalAtP) {
-      const lightIntensity = this.computeLighting(
-        closestP,
-        normalAtP,
-        mathUtils.subtractVectors(O, closestP),
-        closestObj.specular,
-      );
-      return mathUtils.scaleVector(closestObj.color, lightIntensity);
-    }
-
-    // we have no intersection
-    return CANVAS_DEFAULT_BACKGROUND;
+    return closestHit;
   }
 
   computeLighting(P: Vec3, N: Vec3, V: Vec3, s: number) {
     let intensity: number = 0.0;
-    for (let light of this.lights)
-      intensity += light.computeIllumination(P, N, V, s);
+
+    for (let light of this.lights) {
+      const shadowProps = light.getShadowProperties(P);
+
+      // no shadow props, add ambient light as is
+      if (!shadowProps) {
+        intensity += light.computeIllumination(P, N, V, s);
+        continue;
+      }
+
+      // do we have an intersection between us and the light?
+      const [lightDirectionFromP, maxT] = shadowProps;
+      const obstruction = this.closestIntersection(
+        P,
+        lightDirectionFromP,
+        MIN_T_FOR_SHADOW,
+        maxT,
+      );
+
+      // no intersection, means the light has made it to P unimpeded
+      if (!obstruction) {
+        intensity += light.computeIllumination(P, N, V, s);
+      }
+    }
     return intensity;
   }
 }

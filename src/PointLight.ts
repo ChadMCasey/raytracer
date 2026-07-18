@@ -64,4 +64,9 @@ export default class PointLight extends Light {
 
     return specularScalar;
   }
+
+  getShadowProperties(P: Vec3): [Vec3, number] {
+    // max t of 1, we dont care about intersections beyond the light
+    return [mathUtils.subtractVectors(this.position, P), 1];
+  }
 }

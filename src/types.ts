@@ -7,10 +7,19 @@ export type Vec3 = [number, number, number];
 // an RGB value
 export type RGB = [number, number, number];
 
+// specifucally a hit from camera to an object in the scene
 export type HitRecord = {
   distance: number;
   position: Vec3;
   normal: Vec3;
+};
+
+// a generic scene intersection
+export type SceneIntersection = {
+  distance: number;
+  position: Vec3;
+  normal: Vec3;
+  object: SceneObject;
 };
 
 // every object in the scene can be intersected by a ray

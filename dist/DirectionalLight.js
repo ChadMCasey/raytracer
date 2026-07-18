@@ -35,4 +35,9 @@ export default class DirectionalLight extends Light {
         const specularScalar = cosA ** s;
         return specularScalar;
     }
+    getShadowProperties(P) {
+        // directional lights are defined by a fixed direction vector
+        // we need to look out into the infinite space for intersections (maxT = inf)
+        return [this.direction, Number.POSITIVE_INFINITY];
+    }
 }
