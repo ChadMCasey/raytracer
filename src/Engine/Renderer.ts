@@ -17,23 +17,33 @@ class Controller {
 
   render() {
     const cameraPos: Vec3 = this.camera.position;
+    const cameraRotation: number[][] = this.camera.computeRotationMatrix();
+
     const renderW = this.renderTarget.width;
     const renderH = this.renderTarget.height;
 
     for (let x: number = -renderW / 2; x <= renderW / 2; x++) {
       for (let y: number = -renderH / 2; y <= renderH / 2; y++) {
-        const D = this.camera.canvasToViewportCoord(renderW, renderH, x, y);
 
+        // determine directional vector D
+        const D = this.camera.canvasToViewport(renderW, renderH, x, y);
+
+        // rotate directional vector D via rotation matrix
+        const rotatedD = this.camera.computeRotatedVector(cameraRotation, D);
+
+        // notice that rotatedD originates at cameraPos here
         const color = this.scene.traceRay(
           cameraPos,
-          D,
+          rotatedD,
           1,
           Number.POSITIVE_INFINITY,
           MAX_REFLECT_RECUR
         );
 
+        // map back to JS canvas coordinate system
         const [putX, putY] = this.renderTarget.canvasCoordConversion(x, y);
 
+        // paint cell accordingly
         this.renderTarget.putPixel(putX, putY, color);
       }
     }

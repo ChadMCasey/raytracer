@@ -1,8 +1,6 @@
 import { Vec3 } from "./types.js";
 
 // Canvas
-export const CANVAS_WIDTH: number = 1080;
-export const CANVAS_HEIGHT: number = 1080;
 export const CANVAS_DEFAULT_BACKGROUND: Vec3 = [0, 0, 0];
 
 // Camera
