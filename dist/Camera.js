@@ -6,7 +6,7 @@ export default class Camera {
         this.viewportHeight = 1;
         this.viewportDistance = 1;
         // Pitch, Yaw and Roll in degrees
-        this.rotation = { pitch: -20, yaw: 0, roll: 0 };
+        this.rotation = { pitch: 0, yaw: 0, roll: 0 };
         this.position = position; // starting position
     }
     // compute directional ray originating from origin (0,0,0)
