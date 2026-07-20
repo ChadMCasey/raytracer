@@ -1,5 +1,5 @@
-import { Vec3, Rotation } from "./types";
-import MathUtils from "./MathUtils.js";
+import MathUtils from "../Utils/MathUtils.js";
+import { Vec3, Rotation } from "../Configuration/types.js";
 
 export default class Camera {
   private readonly mathUtils = new MathUtils();

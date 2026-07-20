@@ -1,4 +1,4 @@
-import MathUtils from "./MathUtils.js";
+import MathUtils from "../Utils/MathUtils.js";
 export default class Camera {
     constructor(position) {
         this.mathUtils = new MathUtils();
