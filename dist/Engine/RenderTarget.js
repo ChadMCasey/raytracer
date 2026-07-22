@@ -1,8 +1,12 @@
+import { CANVAS_HEIGHT, ASPECT_RATIO } from "../Configuration/constants.js";
 // The canvas is a render target in the context of the web
 export default class RenderTarget {
     constructor() {
         this.canvas = document.getElementById("canvas");
         this.context = this.canvas.getContext("2d");
+        // determine camera dimensions based off browser window aspect ratio
+        this.canvas.height = CANVAS_HEIGHT;
+        this.canvas.width = Math.floor(ASPECT_RATIO() * CANVAS_HEIGHT);
         this.width = this.canvas.width;
         this.height = this.canvas.height;
     }

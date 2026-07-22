@@ -1,19 +1,31 @@
 import MathUtils from "../Utils/MathUtils.js";
 import { Vec3, Rotation } from "../Configuration/types.js";
+import { CANVAS_HEIGHT, ASPECT_RATIO } from "../Configuration/constants.js";
 
 export default class Camera {
   private readonly mathUtils = new MathUtils();
 
   public readonly position: Vec3;
-  public readonly viewportWidth: number = 1;
-  public readonly viewportHeight: number = 1;
-  public readonly viewportDistance: number = 1;
-  
+  public readonly viewportHeight: number;
+  public readonly viewportDistance: number;
+
+  // compute the viewport width based on aspect ratio
+  public readonly viewportWidth = window.innerWidth / window.innerHeight;
+
   // Pitch, Yaw and Roll in degrees
   public readonly rotation: Rotation = { pitch: 0, yaw: 0, roll: 0 };
 
   constructor(position: Vec3) {
-    this.position = position; // starting position
+    this.position = position;
+
+    // determine viewport size based off aspect ratio of browser
+    this.viewportDistance = 1;
+    this.viewportHeight = 1;
+    this.viewportWidth = this.viewportHeight * ASPECT_RATIO();
+
+    console.log(
+      `viewport width: ${this.viewportWidth}, ${this.viewportHeight}`,
+    );
   }
 
   // compute directional ray originating from origin (0,0,0)
@@ -37,9 +49,12 @@ export default class Camera {
 
     // produce the final orthonormal rotation matrix
     const RxRy: number[][] = this.mathUtils.multiplyRotationalMatrices(Rx, Ry);
-    const RxRyRz: number[][] = this.mathUtils.multiplyRotationalMatrices(RxRy, Rz);
+    const RxRyRz: number[][] = this.mathUtils.multiplyRotationalMatrices(
+      RxRy,
+      Rz,
+    );
 
-    // this captures the 3 transformations 
+    // this captures the 3 transformations
     return RxRyRz;
   }
 
