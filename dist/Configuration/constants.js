@@ -1,5 +1,10 @@
 // Canvas
 export const CANVAS_DEFAULT_BACKGROUND = [0, 0, 0];
+export const CANVAS_HEIGHT = 441;
+// aspect ratio
+export const ASPECT_RATIO = () => {
+    return window.innerWidth / window.innerHeight;
+};
 // Camera
 export const CAMERA_POS = [0, 0, 0];
 // Minimal T for shadow determination

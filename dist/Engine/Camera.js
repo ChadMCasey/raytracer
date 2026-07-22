@@ -1,13 +1,17 @@
 import MathUtils from "../Utils/MathUtils.js";
+import { ASPECT_RATIO } from "../Configuration/constants.js";
 export default class Camera {
     constructor(position) {
         this.mathUtils = new MathUtils();
-        this.viewportWidth = 1;
-        this.viewportHeight = 1;
-        this.viewportDistance = 1;
+        // compute the viewport width based on aspect ratio
+        this.viewportWidth = window.innerWidth / window.innerHeight;
         // Pitch, Yaw and Roll in degrees
         this.rotation = { pitch: 0, yaw: 0, roll: 0 };
-        this.position = position; // starting position
+        this.position = position;
+        // determine viewport size based off aspect ratio of browser
+        this.viewportDistance = 1;
+        this.viewportHeight = 1;
+        this.viewportWidth = this.viewportHeight * ASPECT_RATIO();
     }
     // compute directional ray originating from origin (0,0,0)
     canvasToViewport(Cw, Ch, Cx, Cy) {
@@ -28,7 +32,7 @@ export default class Camera {
         // produce the final orthonormal rotation matrix
         const RxRy = this.mathUtils.multiplyRotationalMatrices(Rx, Ry);
         const RxRyRz = this.mathUtils.multiplyRotationalMatrices(RxRy, Rz);
-        // this captures the 3 transformations 
+        // this captures the 3 transformations
         return RxRyRz;
     }
     computeRotatedVector(R, D) {

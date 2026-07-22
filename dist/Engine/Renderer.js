@@ -29,8 +29,8 @@ class Controller {
         }
     }
 }
+const renderTarget = new RenderTarget();
 const scene = new Scene();
 const camera = new Camera(CAMERA_POS);
-const renderTarget = new RenderTarget();
 const control = new Controller(renderTarget, scene, camera);
 document.addEventListener("click", () => control.render());

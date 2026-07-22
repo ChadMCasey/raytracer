@@ -24,7 +24,6 @@ class Controller {
 
     for (let x: number = -renderW / 2; x <= renderW / 2; x++) {
       for (let y: number = -renderH / 2; y <= renderH / 2; y++) {
-
         // determine directional vector D
         const D = this.camera.canvasToViewport(renderW, renderH, x, y);
 
@@ -37,7 +36,7 @@ class Controller {
           rotatedD,
           1,
           Number.POSITIVE_INFINITY,
-          MAX_REFLECT_RECUR
+          MAX_REFLECT_RECUR,
         );
 
         // map back to JS canvas coordinate system
@@ -50,9 +49,9 @@ class Controller {
   }
 }
 
+const renderTarget = new RenderTarget();
 const scene = new Scene();
 const camera = new Camera(CAMERA_POS);
-const renderTarget = new RenderTarget();
 const control = new Controller(renderTarget, scene, camera);
 
 document.addEventListener("click", () => control.render());
