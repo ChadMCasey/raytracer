@@ -12,7 +12,6 @@ export default class Camera {
         this.viewportDistance = 1;
         this.viewportHeight = 1;
         this.viewportWidth = this.viewportHeight * ASPECT_RATIO();
-        console.log(`viewport width: ${this.viewportWidth}, ${this.viewportHeight}`);
     }
     // compute directional ray originating from origin (0,0,0)
     canvasToViewport(Cw, Ch, Cx, Cy) {
