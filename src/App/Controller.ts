@@ -8,10 +8,15 @@ import MathUtils from "../Utils/MathUtils.js";
 
 // read user input and update application
 export default class Controller {
-  private readonly validMovementKeySet = new Set(VALID_MOVEMENT_KEYS);
   private readonly mathUtils = new MathUtils();
 
+  // camera movement
   public readonly keyPressedSet = new Set<string>();
+  private readonly validMovementKeySet = new Set(VALID_MOVEMENT_KEYS);
+
+  // camera orientation
+  private readonly rotationDeltas: Vec2 = [0, 0];
+
   public readonly camera: Camera;
 
   constructor(camera: Camera) {
@@ -28,9 +33,15 @@ export default class Controller {
     document.addEventListener("keyup", (e) => {
       if (this.validMovementKeySet.has(e.key)) this.keyPressedSet.delete(e.key);
     });
+    document.addEventListener("pointerlockchange", (lockEvent) => {});
   }
 
   update(elapsedMs: number) {
+    this.updateCameraPosition(elapsedMs);
+    this.updateCameraOrientation();
+  }
+
+  updateCameraPosition(elapsedMs: number) {
     let changeX: number = 0;
     let changeZ: number = 0;
 
@@ -61,4 +72,6 @@ export default class Controller {
     this.camera.updateCameraX(Dx);
     this.camera.updateCameraZ(Dz);
   }
+
+  updateCameraOrientation() {}
 }

@@ -3,9 +3,12 @@ import MathUtils from "../Utils/MathUtils.js";
 // read user input and update application
 export default class Controller {
     constructor(camera) {
-        this.validMovementKeySet = new Set(VALID_MOVEMENT_KEYS);
         this.mathUtils = new MathUtils();
+        // camera movement
         this.keyPressedSet = new Set();
+        this.validMovementKeySet = new Set(VALID_MOVEMENT_KEYS);
+        // camera orientation
+        this.rotationDeltas = [0, 0];
         this.camera = camera;
         // hookup event listeners
         this.addEventListeners();
@@ -19,8 +22,21 @@ export default class Controller {
             if (this.validMovementKeySet.has(e.key))
                 this.keyPressedSet.delete(e.key);
         });
+        document.addEventListener("pointerlockchange", (lockEvent) => {
+            console.log("Enter");
+            if (lockEvent.target.id === "canvas")
+                document.addEventListener("mousemove", (mouseEvent) => {
+                    this.rotationDeltas[0] = mouseEvent.movementX;
+                    this.rotationDeltas[1] = mouseEvent.movementY;
+                    console.log(this.rotationDeltas);
+                });
+        });
     }
     update(elapsedMs) {
+        this.updateCameraPosition(elapsedMs);
+        this.updateCameraOrientation();
+    }
+    updateCameraPosition(elapsedMs) {
         let changeX = 0;
         let changeZ = 0;
         // accumulate change in position
@@ -42,4 +58,5 @@ export default class Controller {
         this.camera.updateCameraX(Dx);
         this.camera.updateCameraZ(Dz);
     }
+    updateCameraOrientation() { }
 }
